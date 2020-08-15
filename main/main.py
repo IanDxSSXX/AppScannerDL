@@ -21,13 +21,13 @@ def retrain():
     重新训练模型
     :return:
     """
-    for i in range(10, 15):
-        train_set = get_dataset("resources/dataset/training_set@app21_time{}.csv".format(float(i/10)))
+    for i in range(8, 9):
+        train_set = get_dataset("resources/dataset/set42/training_set@app42_time{}.csv".format(float(i/10)))
 
         target_base = get_target_base(train_set)
         train_set = target_str_to_idx(train_set, target_base)
 
-        test_dataset = get_dataset("resources/dataset/testing_set@app21_time{}.csv".format(float(i/10)))
+        test_dataset = get_dataset("resources/dataset/set42/testing_set@app42_time{}.csv".format(float(i/10)))
         test_dataset = target_str_to_idx(test_dataset, target_base)
 
         net_ad = process(train_set, target_base)
@@ -42,33 +42,37 @@ def local_test():
     从本地拉下来模型来测试
     :return:
     """
-    net = torch.load("resources/models/model@21app_time1.2.pth")
-    target_base = np.load("resources/target_base/tb_model@21app_time1.2.npy")
-    test_set = get_dataset("resources/dataset/testing_set@app21_time1.2.csv")
-    test_set = target_str_to_idx(test_set, target_base)
+    app = "21"
+    for j in range(9, 10):
+        time  = format(0.5+j/10, ".1f")
+        net = torch.load("resources/models/app{}/model@{}app_time{}.pth".format(app, app, time),
+                         map_location=torch.device('cpu'))
+        target_base = np.load("resources/target_base/app{}/tb_model@{}app_time{}.npy".format(app, app, time))
+        test_set = get_dataset("resources/dataset/app{}/testing_set@app{}_time{}.csv".format(app, app, time))
+        test_set = target_str_to_idx(test_set, target_base)
 
-    threshold_list = []
-    precision_list = []
-    recall_list = []
-    f1_list = []
-    accuracy_list = []
-    remain_rate_list = []
-    for i in range(1, 200):
-        precision, recall, f1, accuracy, remain_rate = test_net(net, test_set, len(target_base), 0.6+i*0.002)
-        print("FINAL TEST | threshold: {:.3f} | flow remain rate: {:.4f} | "
-              "precision: {:.4f}, recall: {:.4f}, f1: {:.4f}, accuracy: {:.4f}"
-              .format(0.6+i*0.002, remain_rate, precision, recall, f1, accuracy))
+        threshold_list = []
+        precision_list = []
+        recall_list = []
+        f1_list = []
+        accuracy_list = []
+        remain_rate_list = []
+        for i in range(1, 200):
+            precision, recall, f1, accuracy, remain_rate = test_net(net, test_set, len(target_base), 0.6+i*0.002)
+            print("LeNet5 TEST | precision: {:.4f}, recall: {:.4f}, f1: {:.4f}, accuracy: {:.4f}"
+                  .format(precision, recall, f1, accuracy))
 
-        threshold_list.append(0.6+i*0.002)
-        precision_list.append(precision)
-        recall_list.append(recall)
-        f1_list.append(f1)
-        accuracy_list.append(accuracy)
-        remain_rate_list.append(remain_rate)
+            threshold_list.append(0.6+i*0.002)
+            precision_list.append(precision)
+            recall_list.append(recall)
+            f1_list.append(f1)
+            accuracy_list.append(accuracy)
+            remain_rate_list.append(remain_rate)
 
-    draw(threshold_list, precision_list, recall_list, f1_list, accuracy_list, remain_rate_list)
+        draw(threshold_list, precision_list, recall_list, f1_list, accuracy_list, remain_rate_list, j+1)
 
-
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0, numpoints=1, fontsize=10)
+    plt.show()
 
 
 def process(train_set, target_base):
@@ -114,4 +118,6 @@ def process(train_set, target_base):
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    print("precision: 0.5964, recall: 0.5157, f1: 0.4425, accuracy: 0.5521")
+    print("precision: 0.5932, recall: 0.4310, f1: 0.4322, accuracy: 0.8422")

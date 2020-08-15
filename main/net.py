@@ -9,7 +9,8 @@ class LeNet5(nn.Module):
         # Input(1, 32, 32)
         self.conv1 = nn.Sequential(
             nn.Conv2d(1, 6, 5),
-            nn.Tanh()
+            nn.Tanh(),
+            nn.LocalResponseNorm(5)
         )
         # Shape(6, 28, 28)
         self.pool1 = nn.AvgPool2d(2)
@@ -33,12 +34,11 @@ class LeNet5(nn.Module):
         # Shape(84)
         self.fc2 = nn.Sequential(
             nn.Linear(84, 10),
-            nn.ReLU()
+            nn.Tanh()
         )
         # Output(10)
         self.out = nn.Linear(10, out_features)
 
-        self.dropout = nn.Dropout(0.2)
 
 
     def forward(self, x):
@@ -60,11 +60,11 @@ def save_model(net):
     :param net:
     :return:
     """
-    i = 1.0
+    i = 0.8
     while True:
         # 如果模型存在了，继续下去，否则直接存
-        if os.access("./resources/models/model@21app_time{}.pth".format(i), os.F_OK):
-            i += 0.1
+        if os.access("./resources/models/model@42app_time{}.pth".format(i), os.F_OK):
+            i = float(format(i + 0.1, ".1f"))
             continue
-        torch.save(net, "./resources/models/model@21app_time{}.pth".format(i))
+        torch.save(net, "./resources/models/model@42app_time{}.pth".format(i))
         break

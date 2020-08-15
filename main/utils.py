@@ -83,17 +83,17 @@ def save_target_base(target_base):
     :param target_base:
     :return:
     """
-    i = 1.0
+    i = 0.8
     while True:
         # 如果模型存在了，继续下去，否则直接存
-        if os.access("./resources/target_base/tb_model@21app_time{}.npy".format(i), os.F_OK):
-            i += 0.1
+        if os.access("./resources/target_base/tb_model@42app_time{}.npy".format(i), os.F_OK):
+            i = float(format(i + 0.1, ".1f"))
             continue
-        np.save("./resources/target_base/tb_model@21app_time{}.npy".format(i), target_base)
+        np.save("./resources/target_base/tb_model@42app_time{}.npy".format(i), target_base)
         break
 
 
-def draw(threshold_list, precision_list, recall_list, f1_list, accuracy_list, remain_rate_list):
+def draw(threshold_list, precision_list, recall_list, f1_list, accuracy_list, remain_rate_list, i):
     """
     画图
     :param threshold_list:
@@ -104,19 +104,24 @@ def draw(threshold_list, precision_list, recall_list, f1_list, accuracy_list, re
     :param remain_rate_list:
     :return:
     """
+    if i <= 5:
+        plt.subplot(5, 2, 2 * (i - 1) + 1)
+    else:
+        plt.subplot(5, 2, 2 * (i - 5))
     plt.ylim(0, 100)
-    plt.plot(threshold_list, [i*100 for i in precision_list], linewidth=1, markevery=10, marker='*',
-             markersize=6, label="Precision")
-    plt.plot(threshold_list, [i*100 for i in recall_list], linewidth=1, markevery=10, marker='h',
-             markersize=6, label="Recall")
-    plt.plot(threshold_list, [i*100 for i in f1_list], linewidth=1, markevery=10, marker='s',
-             markersize=6, label="F1")
-    plt.plot(threshold_list, [i*100 for i in accuracy_list], linewidth=1, markevery=10, marker='X',
-             markersize=6, label="Accuracy")
-    plt.plot(threshold_list, [i*100 for i in remain_rate_list], linewidth=1, markevery=10, linestyle='--', marker='o',
-             markersize=6, label="Flow Remain Rate")
-    plt.xlabel("Threshold")
-    plt.ylabel("Classifier Performance(%)")
-    plt.title("Dataset1")
-    plt.legend()
-    plt.show()
+    plt.plot(threshold_list, [i*100 for i in precision_list], linewidth=1, markevery=20, marker='*',
+             markersize=3, label="Precision")
+    plt.plot(threshold_list, [i*100 for i in recall_list], linewidth=1, markevery=20, marker='h',
+             markersize=3, label="Recall")
+    plt.plot(threshold_list, [i*100 for i in f1_list], linewidth=1, markevery=20, marker='s',
+             markersize=3, label="F1")
+    plt.plot(threshold_list, [i*100 for i in accuracy_list], linewidth=1, markevery=20, marker='X',
+             markersize=3, label="Accuracy")
+    plt.plot(threshold_list, [i*100 for i in remain_rate_list], linewidth=1, markevery=20, linestyle='--', marker='o',
+             markersize=3, label="Flow Remain Rate")
+    if (i == 5) | (i == 10):
+        plt.xlabel("PPT")
+    if (i == 1) | (i == 6):
+        plt.ylabel("Classifier Performance(%)")
+    plt.title("Burst of time {}s".format(0.5+(i-1)/10))
+    plt.grid()

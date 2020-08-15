@@ -14,17 +14,27 @@ def train_net(net, train_set):
     """
     # 打印
     print("----------Start Training----------")
+
     # 训练集
     train_data, train_target = train_set
+
+    if torch.cuda.is_available():
+        net = net.cuda()
+        train_data = train_data.cuda()
+        train_target = train_target.cuda()
+
+    # Dataloader
     train_set = Data.TensorDataset(train_data, train_target)
-    train_loader = Data.DataLoader(dataset=train_set, batch_size=20, shuffle=True)
+    train_loader = Data.DataLoader(dataset=train_set, batch_size=25, shuffle=True)
 
     # 优化器和损失函数
     opt = torch.optim.Adam(net.parameters(), lr=0.0005, betas=(0.9, 0.99), weight_decay=1e-5)
     loss_func = nn.CrossEntropyLoss()
+    if torch.cuda.is_available():
+        loss_func = loss_func.cuda()
 
     # 整数据集训练次数
-    epochs = 400
+    epochs = 500
     for epoch in range(epochs):
         for idx, (data, target) in enumerate(train_loader):
             train_output = net(data)
@@ -35,10 +45,12 @@ def train_net(net, train_set):
 
             # 打印精确度
             if (idx == 0) & ((epoch+1) % 8 == 0):
+
                 test_data = train_data[200:400]
                 test_target = train_target[200:400].data.numpy()
                 test_output = net(test_data)
-                pred_target = torch.max(test_output, 1)[1].data.numpy()
+                pred_target = torch.max(test_output, 1)[1]
+                pred_target = pred_target.data.numpy()
                 accuracy = accuracy_score(pred_target, test_target)
 
                 print("epoch: {:03}/{} | idx: {:03} loss: {:.4f} | accuracy: {:.4f}"
